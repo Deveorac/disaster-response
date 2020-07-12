@@ -1,6 +1,3 @@
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
@@ -75,12 +72,4 @@ Jupyter Notebooks are also provided to walk through the scripts, though these ar
 Mehrnaz Siavoshi - [@i_mehrnaz](https://twitter.com/i_mehrnaz)
 
 Project Link: [https://github.com/Deveorac/disaster-response](https://github.com/Deveorac/disaster-response)
-
-
-
-![Train Classifier without Category Level Precision Recall](screenshots/train_classifier.png)
-
-6. Sample run of train_classifier.py with precision, recall etc. for each category
-
-![Train Classifier with Category Level Precision Recall](screenshots/train_classifier_category_precision_recall.png)
 
