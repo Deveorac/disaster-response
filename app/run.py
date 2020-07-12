@@ -2,8 +2,12 @@ import json
 import plotly
 import pandas as pd
 
-from nltk.stem import WordNetLemmatizer
+import re
+import nltk
+
+from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.stem.porter import PorterStemmer
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -15,22 +19,26 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
+    # normalizing text
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+    
+    # tokenizing
+    token = word_tokenize(text)
+    
+    # removal of stop words
+    normalizer = PorterStemmer()
+    stop_words = stopwords.words('english')
+    
+    tokenized = [normalizer.stem(word) for word in token if word not in stop_words]
 
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
+    return tokenized
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('Messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -41,11 +49,19 @@ def index():
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
+    genre_percents = round(100*genre_counts/genre_counts.sum(), 2)
     genre_names = list(genre_counts.index)
+    
+    categories = df.iloc[:,4:].columns
+    booleans = (df.iloc[:,4:] != 0).sum().values
+    
+    
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
+
     graphs = [
+        # graph 1
         {
             'data': [
                 Bar(
@@ -63,8 +79,63 @@ def index():
                     'title': "Genre"
                 }
             }
+        },
+        # graph 2
+        {
+            "data": [
+              {
+                "type": "pie",
+                "uid": "f4de1f",
+                "hole": 0.25,
+                "name": "Genre",
+                "pull": 0,
+                "domain": {
+                  "x": genre_percents,
+                  "y": genre_names
+                },
+                "marker": {
+                  "colors": [
+                    "#BEC5AD",
+                    "#A4B494",
+                    "#519872"
+                   ]
+                },
+                "textinfo": "label+value",
+                "hoverinfo": "all",
+                "labels": genre_names,
+                "values": genre_counts
+              }
+            ],
+            "layout": {
+              "title": "Percent of Messages by Genre"
+            }
+        },
+        
+        # graph 3
+        
+           {
+            'data': [
+                Bar(
+                    x=categories,
+                    y=booleans
+                )
+            ],
+
+            'layout': {
+                'title': 'Message Category Distribution',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category",
+                    'tickangle': 40
+                }
+            }
         }
     ]
+    
+ 
+    
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
