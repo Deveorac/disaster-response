@@ -24,13 +24,15 @@ def tokenize(text):
     
     # tokenizing
     token = word_tokenize(text)
-    
-    # removal of stop words
-    normalizer = PorterStemmer()
-    stop_words = stopwords.words('english')
-    
-    tokenized = [normalizer.stem(word) for word in token if word not in stop_words]
+    lemmatizer = WordNetLemmatizer()
 
+    tokenized = []
+    
+    for k in tokens:
+        tok = lemmatizer.lemmatize(k).lower().strip()
+        tokenized.append(tok)
+    
+   
     return tokenized
 
 # load data
