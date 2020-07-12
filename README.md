@@ -1,3 +1,5 @@
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 
 <!-- PROJECT LOGO -->
 <br />
@@ -73,3 +75,7 @@ Mehrnaz Siavoshi - [@i_mehrnaz](https://twitter.com/i_mehrnaz)
 
 Project Link: [https://github.com/Deveorac/disaster-response](https://github.com/Deveorac/disaster-response)
 
+
+
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
+[linkedin-url]: hhttps://www.linkedin.com/in/mehrnazsiavoshi/
