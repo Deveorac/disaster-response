@@ -1,24 +1,123 @@
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, make_scorer
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+import warnings
+import re
+import pickle
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem.porter import PorterStemmer
+nltk.download('punkt')
+nltk.download('stopwords')
+warnings.simplefilter('ignore')
 
 
 def load_data(database_filepath):
-    pass
+    """
+    Loads data from the database
+    
+    Input: filepath to the SQLite database
+    
+    Output: x dataframe with features
+    y dataframe with labels
+    names with list of categories
+    """
+
+    engine = create_engine('sqlite:///' + database_filepath)
+    df = pd.read_sql_table('Messages',engine)
+    
+    # remove NaN
+    df =df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+    
+    # dependent variable
+    x = df['message']
+    
+    # explanatory variable
+    y = df.drop(['id', 'message', 'genre'], axis = 1)
+    
+    # cateogry names
+    names = list(y.columns.values)
+    
+    return x, y, names
 
 
 def tokenize(text):
-    pass
+    """
+    Tokenize the text
+    
+    Input: text 
+    
+    Output: tokenized - clean, tokenized text
+    """
+    # normalizing text
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+    
+    # tokenizing
+    token = word_tokenize(text)
+    
+    # removal of stop words
+    normalizer = PorterStemmer()
+    stop_words = stopwords.words('english')
+    
+    tokenized = [normalizer.stem(word) for word in token if word not in stop_words]
+    
+    return tokenized
 
 
 def build_model():
-    pass
+    """
+    Builds the pipeline
+    
+    Input: none
+    
+    Output: pipeline 
+    """
+    pipeline = Pipeline([('vect', CountVectorizer(tokenizer = tokenize)),
+                        ('tfidf', TfidfTransformer()),
+                        ('clf', MultiOutputClassifier(RandomForestClassifier()))])
+    
+    return pipeline
 
 
-def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+def evaluate_model(model, x_test, y_test, names):
+    """
+    Using a prepared model, evaulates on 4 metrics
+    
+    Input: model, x_test, y_text, names
+    
+    Output: all_metrics
+    """
+    y_test_predictions = model.predict(x_test)
+    
+    metrics = []
+    
+    for i, col in enumerate(names):
+        
+        precision, recall, fscore, support = precision_recall_fscore_support(y_test[col], y_test[:,i], average='weighted')
+        metrics.append([accuracy, precision, recall, f1])
+        
+    metrics = np.array(metrics)
+    all_metrics = pd.DataFrame(data=metrics, index=names, columns = ['Accuracy','Precision', 'Recall', 'F1 Score'])
+    
+    return all_metrics
 
 
 def save_model(model, model_filepath):
-    pass
+    """
+    Saves model as a pickle file
+    """
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
