@@ -1,3 +1,5 @@
+# updated July 12, 2020 to include a lemmatizer in the tokenize function
+
 import sys
 import pandas as pd
 from sqlalchemy import create_engine
@@ -16,6 +18,7 @@ import re
 import pickle
 import nltk
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
 nltk.download('punkt')
@@ -65,13 +68,15 @@ def tokenize(text):
     
     # tokenizing
     token = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+
+    tokenized = []
     
-    # removal of stop words
-    normalizer = PorterStemmer()
-    stop_words = stopwords.words('english')
+    for k in tokens:
+        tok = lemmatizer.lemmatize(k).lower().strip()
+        tokenized.append(tok)
     
-    tokenized = [normalizer.stem(word) for word in token if word not in stop_words]
-    
+   
     return tokenized
 
 
