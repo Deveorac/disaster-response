@@ -78,4 +78,4 @@ Project Link: [https://github.com/Deveorac/disaster-response](https://github.com
 
 
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: hhttps://www.linkedin.com/in/mehrnazsiavoshi/
+[linkedin-url]: https://www.linkedin.com/in/mehrnazsiavoshi/
